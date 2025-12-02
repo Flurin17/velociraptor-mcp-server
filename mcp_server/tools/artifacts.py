@@ -11,7 +11,8 @@ def list_artifacts(cfg: ServerConfig, search: Optional[str] = None, limit: int =
     predicate = ""
     if search:
         predicate = f" WHERE Name =~ '{search}' OR Description =~ '{search}'"
-    vql = f"SELECT Name, Description, Type FROM artifacts(){predicate} LIMIT {limit}"
+    # artifact_definitions() returns both compiled-in and custom artifacts.
+    vql = f"SELECT Name, Description, Type FROM artifact_definitions(){predicate} LIMIT {limit}"
     rows = get_client(cfg).query(vql)
     return {"artifacts": normalize_records(rows)}
 

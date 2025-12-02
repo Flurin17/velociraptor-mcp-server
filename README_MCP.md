@@ -142,5 +142,15 @@ twine upload dist/*   # requires PYPI_USERNAME and PYPI_PASSWORD or token in ~/.
 ```
 Tagging a release is recommended (see CI section).
 
+## Releasing via GitHub Actions
+If your CI publishes on tagged pushes, use these steps:
+```sh
+git add pyproject.toml mcp_server/__init__.py README_MCP.md
+git commit -m "Release 0.1.2"        # or skip if already committed
+git tag -a v0.1.2 -m "v0.1.2"        # bump tag version as needed
+git push origin main                  # adjust branch name if different
+git push origin v0.1.2                # triggers the release workflow
+```
+
 ## License
 This project is licensed under the MIT License. See `LICENSE` for the full text.

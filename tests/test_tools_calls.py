@@ -95,7 +95,8 @@ def test_get_hunt_results_with_client(cfg, fake_client):
 
 def test_artifact_tools(cfg, fake_client):
     artifacts.list_artifacts(cfg, search="Windows")
-    assert "Windows" in fake_client.queries[-1][0]
+    stmt, _ = fake_client.queries[-1]
+    assert "Windows" in stmt and "artifact_definitions" in stmt
 
     artifacts.collect_artifact(cfg, client_id="C.9", artifact="Sys.Info", params={"foo": "bar"})
     stmt, _ = fake_client.queries[-1]
