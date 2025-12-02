@@ -35,3 +35,19 @@
 - The Velociraptor API requires mTLS; keep `api.config.yaml` and generated certs in `velociraptor_lab/volumes/api/` and never commit private keys.
 - Use env overrides (`VELOCIRAPTOR_API_CONFIG`, `MCP_LOG_LEVEL`, `MCP_SERVER_NAME`) for local tweaks; avoid hard-coding hostnames/ports in code.
 - The lab is the preferred way to validate new endpoints end-to-end before shipping changes to the MCP server.
+
+## Release & Publish Playbook
+- Bump version in **both** `pyproject.toml` and `mcp_server/__init__.py`; keep README release snippets aligned with the tag.
+- Clean and rebuild artifacts with pinned build deps (set in `pyproject.toml`):
+  - `rm -rf dist build velociraptor_mcp_server.egg-info`
+  - `python3 -m venv .venv && . .venv/bin/activate`
+  - `pip install -U pip build twine`
+  - `python -m build --no-isolation`
+  - `python -m twine check dist/*`
+- Tag and push (CI uses Trusted Publishing, no PyPI token):
+  - `git add pyproject.toml mcp_server/__init__.py README.md`
+  - `git commit -m "Release X.Y.Z"`
+  - `git tag -a vX.Y.Z -m "vX.Y.Z"`
+  - `git push origin main && git push origin vX.Y.Z`
+- Do **not** reuse tags/versions already on PyPI. If a publish fails after a tag, bump the patch version and retag.
+- Ensure PyPI Trusted Publisher for `.github/workflows/ci.yml` is linked once in project settings; CI publish runs on `v*` tags after tests pass.
