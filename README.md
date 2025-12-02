@@ -164,10 +164,10 @@ twine upload dist/*
 If your CI publishes on tagged pushes, use these steps:
 ```sh
 git add pyproject.toml mcp_server/__init__.py README.md
-git commit -m "Release 0.1.5"        # or skip if already committed
-git tag -a v0.1.5 -m "v0.1.5"        # bump tag version as needed
+git commit -m "Release 0.1.6"        # or skip if already committed
+git tag -a v0.1.6 -m "v0.1.6"        # bump tag version as needed
 git push origin main                  # adjust branch name if different
-git push origin v0.1.5                # triggers the release workflow
+git push origin v0.1.6                # triggers the release workflow
 ```
 Trusted Publishing: the workflow uses PyPI OIDC; register `.github/workflows/ci.yml` as a Trusted Publisher in PyPI project settings. No `PYPI_API_TOKEN` is needed once linked.
 

@@ -4,13 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "velociraptor-mcp-server"
-version = "0.1.5"
+version = "0.1.6"
 description = "FastMCP server that exposes Velociraptor APIs."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Velociraptor MCP maintainers" }]
-license = "MIT"
-license-files = ["LICENSE"]
+license = { file = "LICENSE" }
 keywords = ["velociraptor", "mcp", "fastmcp", "ir", "dfir", "forensics"]
 classifiers = [
     "Programming Language :: Python :: 3",
