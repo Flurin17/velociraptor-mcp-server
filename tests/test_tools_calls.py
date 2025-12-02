@@ -40,9 +40,8 @@ def fake_client(monkeypatch):
 def test_query_vql_passes_through(cfg, fake_client):
     out = vql.query_vql(cfg, "SELECT 1")
     assert out["rows"] == [{"ok": True}]
-    stmt, params = fake_client.queries[0]
+    stmt, _ = fake_client.queries[0]
     assert "SELECT 1" in stmt
-    assert params is None
 
 
 def test_list_clients_builds_vql(cfg, fake_client):

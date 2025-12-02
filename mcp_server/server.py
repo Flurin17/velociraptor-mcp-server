@@ -16,7 +16,9 @@ def build_server(cfg: ServerConfig):
     try:
         from mcp.server.fastmcp import FastMCP  # type: ignore
     except Exception as exc:  # pragma: no cover
-        raise RuntimeError("fastmcp is not installed. Run `pip install -r requirements.txt`.") from exc
+        raise RuntimeError(
+            "fastmcp is not installed. Run `pip install -r requirements.txt`."
+        ) from exc
 
     logging.basicConfig(level=getattr(logging, cfg.log_level, logging.INFO))
 
@@ -30,9 +32,9 @@ def build_server(cfg: ServerConfig):
     # Tool registrations (thin wrappers to inject cfg)
     #
     @mcp.tool()
-    def query_vql(vql: str, params: dict[str, Any] | None = None):
+    def query_vql(vql: str):
         """Execute an arbitrary VQL query and return rows."""
-        return tools.query_vql(cfg, vql=vql, params=params)
+        return tools.query_vql(cfg, vql=vql)
 
     @mcp.tool()
     def list_clients(limit: int = 200, offset: int = 0):
@@ -45,9 +47,16 @@ def build_server(cfg: ServerConfig):
         return tools.get_client_info(cfg, client_id=client_id)
 
     @mcp.tool()
-    def search_clients(hostname: str | None = None, label: str | None = None, query: str | None = None, limit: int = 200):
+    def search_clients(
+        hostname: str | None = None,
+        label: str | None = None,
+        query: str | None = None,
+        limit: int = 200,
+    ):
         """Search clients by hostname, label, or VQL filter."""
-        return tools.search_clients(cfg, hostname=hostname, label=label, query=query, limit=limit)
+        return tools.search_clients(
+            cfg, hostname=hostname, label=label, query=query, limit=limit
+        )
 
     @mcp.tool()
     def list_hunts(state: str | None = None, limit: int = 100):
@@ -60,9 +69,17 @@ def build_server(cfg: ServerConfig):
         return tools.get_hunt_details(cfg, hunt_id=hunt_id)
 
     @mcp.tool()
-    def create_hunt(artifact: str, query: str, description: str = "", start_immediately: bool = True):
+    def create_hunt(
+        artifact: str, query: str, description: str = "", start_immediately: bool = True
+    ):
         """Create and optionally start a hunt from a VQL query."""
-        return tools.create_hunt(cfg, artifact=artifact, query=query, description=description, start_immediately=start_immediately)
+        return tools.create_hunt(
+            cfg,
+            artifact=artifact,
+            query=query,
+            description=description,
+            start_immediately=start_immediately,
+        )
 
     @mcp.tool()
     def stop_hunt(hunt_id: str):
@@ -72,7 +89,9 @@ def build_server(cfg: ServerConfig):
     @mcp.tool()
     def get_hunt_results(hunt_id: str, client_id: str | None = None, limit: int = 200):
         """Retrieve hunt results, optionally scoped to a client."""
-        return tools.get_hunt_results(cfg, hunt_id=hunt_id, client_id=client_id, limit=limit)
+        return tools.get_hunt_results(
+            cfg, hunt_id=hunt_id, client_id=client_id, limit=limit
+        )
 
     @mcp.tool()
     def list_artifacts(search: str | None = None, limit: int = 200):
@@ -80,14 +99,22 @@ def build_server(cfg: ServerConfig):
         return tools.list_artifacts(cfg, search=search, limit=limit)
 
     @mcp.tool()
-    def collect_artifact(client_id: str, artifact: str, params: dict[str, Any] | None = None):
+    def collect_artifact(
+        client_id: str, artifact: str, params: dict[str, Any] | None = None
+    ):
         """Collect an artifact from a client."""
-        return tools.collect_artifact(cfg, client_id=client_id, artifact=artifact, params=params)
+        return tools.collect_artifact(
+            cfg, client_id=client_id, artifact=artifact, params=params
+        )
 
     @mcp.tool()
-    def upload_artifact(name: str, vql: str, description: str = "", type_: str = "CLIENT"):
+    def upload_artifact(
+        name: str, vql: str, description: str = "", type_: str = "CLIENT"
+    ):
         """Upload a custom artifact definition."""
-        return tools.upload_artifact(cfg, name=name, vql=vql, description=description, type_=type_)
+        return tools.upload_artifact(
+            cfg, name=name, vql=vql, description=description, type_=type_
+        )
 
     @mcp.tool()
     def get_artifact_definition(name: str):
@@ -107,7 +134,9 @@ def build_server(cfg: ServerConfig):
     @mcp.tool()
     def download_file(client_id: str, path: str, offset: int = 0, length: int = 0):
         """Download a file (base64) from the VFS."""
-        return tools.download_file(cfg, client_id=client_id, path=path, offset=offset, length=length)
+        return tools.download_file(
+            cfg, client_id=client_id, path=path, offset=offset, length=length
+        )
 
     @mcp.tool()
     def get_server_stats():
@@ -125,9 +154,13 @@ def build_server(cfg: ServerConfig):
         return tools.list_alerts(cfg, limit=limit)
 
     @mcp.tool()
-    def create_alert(title: str, message: str, client_id: str | None = None, severity: str = "INFO"):
+    def create_alert(
+        title: str, message: str, client_id: str | None = None, severity: str = "INFO"
+    ):
         """Create a custom alert."""
-        return tools.create_alert(cfg, title=title, message=message, client_id=client_id, severity=severity)
+        return tools.create_alert(
+            cfg, title=title, message=message, client_id=client_id, severity=severity
+        )
 
     #
     # Resources

@@ -15,13 +15,15 @@ def list_directory(cfg: ServerConfig, client_id: str, path: str) -> Dict[str, An
     resulting flow for rows.
     """
     client = get_client(cfg)
+    safe_client_id = client_id.replace("'", "''")
+    safe_path = path.replace("'", "''")
     # Kick off the collection.
     start_vql = (
         "SELECT collect_client("
         "client_id='{client_id}', artifacts=['System.VFS.ListDirectory'], "
         "parameters={{Path:'{path}', Accessor:'auto', Depth:0}})"
         " AS Flow FROM scope()"
-    ).format(client_id=client_id, path=path)
+    ).format(client_id=safe_client_id, path=safe_path)
     flow_rows = list(client.query(start_vql))
     flow_id = None
     if flow_rows and flow_rows[0].get("Flow"):
@@ -35,9 +37,7 @@ def list_directory(cfg: ServerConfig, client_id: str, path: str) -> Dict[str, An
     entries: list[dict[str, Any]] = []
     if flow_id:
         # Poll for up to ~15 seconds for results to arrive.
-        poll_vql = (
-            f"SELECT * FROM flow_results(client_id='{client_id}', flow_id='{flow_id}')"
-        )
+        poll_vql = f"SELECT * FROM flow_results(client_id='{safe_client_id}', flow_id='{flow_id}')"
         for _ in range(15):
             rows = list(client.query(poll_vql))
             if rows:
@@ -49,10 +49,12 @@ def list_directory(cfg: ServerConfig, client_id: str, path: str) -> Dict[str, An
 
 
 def get_file_info(cfg: ServerConfig, client_id: str, path: str) -> Dict[str, Any]:
+    safe_client_id = client_id.replace("'", "''")
+    safe_path = path.replace("'", "''")
     vql = (
         "SELECT * FROM query(query=\"SELECT * FROM stat(path='{path}', accessor='vfs')\", "
         "env=dict(ClientId='{client_id}'))"
-    ).format(path=path, client_id=client_id)
+    ).format(path=safe_path, client_id=safe_client_id)
     rows = get_client(cfg).query(vql)
     return {"info": normalize_records(rows)}
 
@@ -62,12 +64,14 @@ def download_file(
 ) -> Dict[str, Any]:
     import base64
 
+    safe_client_id = client_id.replace("'", "''")
+    safe_path = path.replace("'", "''")
     # read_file accessor 'vfs' uses ClientId from env; returns rows with Data field.
     vql = (
         'SELECT Data, Offset FROM query(query="SELECT Data, Offset FROM read_file('
         "accessor='vfs', filenames=['{path}'], offset={offset}, length={length})\", "
         "env=dict(ClientId='{client_id}'))"
-    ).format(path=path, offset=offset, length=length, client_id=client_id)
+    ).format(path=safe_path, offset=offset, length=length, client_id=safe_client_id)
     rows = list(get_client(cfg).query(vql))
     if not rows:
         return {

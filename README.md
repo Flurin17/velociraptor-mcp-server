@@ -1,7 +1,7 @@
 # Velociraptor MCP Server
 
 ## Quickstart
-- Create a venv and install: `python3 -m venv .venv && . .venv/bin/activate && pip install velociraptor-mcp-server`
+- Install the published package: `python3 -m venv .venv && . .venv/bin/activate && pip install velociraptor-mcp-server`
 - Run (needs mTLS config): `velociraptor-mcp --config /absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml`
 - Codex one-liner (installed package):
   ```sh
@@ -19,6 +19,7 @@ A FastMCP-based server that exposes Velociraptor capabilities (VQL queries, hunt
 - Generated Velociraptor mTLS API config (`api.config.yaml`) – the lab can generate this for you.
 
 ## Install / Develop
+- From PyPI: `pip install velociraptor-mcp-server`
 - Runtime (source): `pip install .`
 - Dev/editable: `pip install -e .[dev]`
 - Legacy: `pip install -r requirements.txt`
