@@ -80,6 +80,12 @@ Troubleshooting lab enrollment:
 - If `clients()` is empty, delete `velociraptor_lab/volumes/*` and redeploy the lab.
 - For manual probing, `python test_api.py --query "SELECT * FROM clients()"`.
 
+## Development
+- Create a fresh venv and install dev extras: `python3 -m venv .venv && . .venv/bin/activate && pip install -e .[dev]`.
+- Run unit tests locally: `. .venv/bin/activate && pytest`.
+- Validate API wiring against the lab: `python test_api.py --config velociraptor_lab/volumes/api/api.config.yaml --query "SELECT * FROM clients()"` (after bringing up the lab).
+- Linting is minimal today; focus on tests and keeping tool names/config keys aligned with VQL and env vars.
+
 ## Tests
 ```sh
 . .venv/bin/activate
@@ -127,7 +133,7 @@ requirements.txt  # shared deps (MCP + lab)
 velociraptor_lab/ # podman/docker lab for local Velociraptor API
 ```
 
-## Releasing to PyPI (manual)
+## Publishing to PyPI (manual)
 ```sh
 . .venv/bin/activate
 pip install -U pip build twine
@@ -135,3 +141,6 @@ python -m build
 twine upload dist/*   # requires PYPI_USERNAME and PYPI_PASSWORD or token in ~/.pypirc
 ```
 Tagging a release is recommended (see CI section).
+
+## License
+This project is licensed under the MIT License. See `LICENSE` for the full text.
