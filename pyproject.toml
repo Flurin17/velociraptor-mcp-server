@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools==75.1.0", "wheel==0.44.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "velociraptor-mcp-server"
-version = "0.1.4"
+version = "0.1.5"
 description = "FastMCP server that exposes Velociraptor APIs."
 readme = "README.md"
 requires-python = ">=3.10"
