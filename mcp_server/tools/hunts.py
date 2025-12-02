@@ -20,8 +20,7 @@ def list_hunts(
 
 
 def get_hunt_details(cfg: ServerConfig, hunt_id: str) -> Dict[str, Any]:
-    safe_hunt_id = hunt_id.replace("'", "''")
-    vql = f"SELECT * FROM hunt_details(hunt_id='{safe_hunt_id}')"
+    vql = f"SELECT * FROM hunts() WHERE HuntId = '{hunt_id}'"
     rows = get_client(cfg).query(vql)
     return {"hunt": normalize_records(rows)}
 

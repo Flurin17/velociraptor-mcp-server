@@ -34,13 +34,16 @@ def collect_artifact(
             for k, v in params.items()
         )
         param_clause = f", parameters=dict({param_items})"
-    # Escape single quotes in artifact name
+    # Escape single quotes in inputs
+    safe_client_id = client_id.replace("'", "''")
     safe_artifact = artifact.replace("'", "''")
     # collect_client must be executed with FROM scope()
     vql = (
         "SELECT collect_client(client_id='{client_id}', artifacts=['{artifact}']{param_clause}) "
         "AS FlowId FROM scope()"
-    ).format(client_id=client_id, artifact=safe_artifact, param_clause=param_clause)
+    ).format(
+        client_id=safe_client_id, artifact=safe_artifact, param_clause=param_clause
+    )
     rows = get_client(cfg).query(vql)
     return {"result": normalize_records(rows)}
 

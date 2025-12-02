@@ -128,17 +128,18 @@ def test_artifact_tools(cfg, fake_client):
 
 def test_file_tools_and_download(cfg, fake_client):
     files.list_directory(cfg, client_id="C.7", path="/tmp")
-    assert "collect_client" in fake_client.queries[-1][0]
+    assert "vfs_files" in fake_client.queries[-1][0]
 
     files.get_file_info(cfg, client_id="C.7", path="/tmp/file.txt")
-    assert "stat(" in fake_client.queries[-1][0]
+    assert "vfs_files" in fake_client.queries[-1][0]
 
     out = files.download_file(
         cfg, client_id="C.7", path="/tmp/file.txt", offset=1, length=2
     )
-    # download now uses VQL read_file; we only validate shape.
+    # download uses gRPC VFSGetBuffer directly
     assert out["path"] == "/tmp/file.txt"
-    assert out["length"] == 0 or out["length"] >= 0
+    assert out["length"] >= 0
+    assert fake_client.downloads[-1] == ("C.7", "/tmp/file.txt", 1, 2)
 
 
 def test_monitoring_tools(cfg, fake_client):
