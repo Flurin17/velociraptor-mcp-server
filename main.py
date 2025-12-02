@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import sys
 
 from mcp_server.config import ConfigError, load_config
@@ -26,9 +27,9 @@ def main():
             default_path=args.api_config if args.api_config else None,
         )
         if args.log_level:
-            cfg.log_level = args.log_level.upper()
+            cfg = dataclasses.replace(cfg, log_level=args.log_level.upper())
         if args.server_name:
-            cfg.server_name = args.server_name
+            cfg = dataclasses.replace(cfg, server_name=args.server_name)
     except ConfigError as exc:
         sys.stderr.write(f"Config error: {exc}\n")
         sys.exit(1)

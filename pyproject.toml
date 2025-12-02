@@ -28,3 +28,6 @@ velociraptor-mcp = "main:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["mcp_server*"]
+
+[tool.setuptools]
+py-modules = ["main"]
