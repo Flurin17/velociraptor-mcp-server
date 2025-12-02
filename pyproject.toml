@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "velociraptor-mcp-server"
+version = "0.1.0"
+description = "FastMCP server that exposes Velociraptor APIs."
+readme = "README_MCP.md"
+requires-python = ">=3.10"
+authors = [{ name = "Velociraptor MCP maintainers" }]
+dependencies = [
+    "fastmcp",
+    "pyvelociraptor",
+    "pydantic",
+    "python-dotenv",
+    "grpcio",
+    "grpcio-tools",
+    "pandas",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+velociraptor-mcp = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mcp_server*"]

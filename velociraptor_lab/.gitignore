@@ -1,0 +1,13 @@
+# Local environment
+.env
+
+# Podman volumes and generated configs
+volumes/
+
+# Python artifacts
+__pycache__/
+*.pyc
+.venv/
+
+# Podman Compose metadata
+podman-compose.override.yml

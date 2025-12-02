@@ -1,0 +1,8 @@
+fastmcp
+pyvelociraptor
+pydantic
+python-dotenv
+grpcio
+grpcio-tools
+pytest
+pandas
