@@ -7,7 +7,9 @@ from mcp_server.config import ServerConfig
 from mcp_server.utils import normalize_records
 
 
-def list_hunts(cfg: ServerConfig, state: Optional[str] = None, limit: int = 100) -> Dict[str, Any]:
+def list_hunts(
+    cfg: ServerConfig, state: Optional[str] = None, limit: int = 100
+) -> Dict[str, Any]:
     predicate = ""
     if state:
         predicate = f" WHERE State = '{state}'"
@@ -30,27 +32,36 @@ def create_hunt(
     start_immediately: bool = True,
 ) -> Dict[str, Any]:
     """
-    Create a hunt by defining an artifact with provided VQL.
+    Create a hunt by defining an inline artifact with provided VQL.
+
+    Velociraptor 0.75 exposes hunt() (function) rather than create_hunt() (plugin),
+    and it must be invoked with FROM scope().
     """
-    vql = f"""
-LET hunt_artifact <= {{
-    Name: '{artifact}',
-    Description: '{description}',
-    Sources: [{{Queries: [{{VQL: '''{query}'''}}]}}]
-}};
-SELECT create_hunt(artifact=hunt_artifact, start_immediately={str(start_immediately).lower()}) AS HuntId
-"""
+    vql = (
+        "SELECT hunt(description='{description}', artifacts=['{artifact}'], "
+        "start_immediately={start_immediately}, "
+        "artifact_doc={{Name:'{artifact}',Description:'{description}',Sources:[{{Queries:[{{VQL:'''{query}'''}}]}}]}}) "
+        "AS Hunt FROM scope()"
+    ).format(
+        description=description,
+        artifact=artifact,
+        query=query.replace("'", "''"),
+        start_immediately=str(start_immediately).lower(),
+    )
     rows = get_client(cfg).query(vql)
     return {"result": normalize_records(rows)}
 
 
 def stop_hunt(cfg: ServerConfig, hunt_id: str) -> Dict[str, Any]:
-    vql = f"SELECT stop_hunt(hunt_id='{hunt_id}') AS Stopped"
+    # There is no stop_hunt plugin in v0.75; best-effort delete via hunt_delete() if available.
+    vql = f"SELECT hunt_delete(hunt_id='{hunt_id}') AS Deleted FROM scope()"
     rows = get_client(cfg).query(vql)
     return {"result": normalize_records(rows)}
 
 
-def get_hunt_results(cfg: ServerConfig, hunt_id: str, client_id: Optional[str] = None, limit: int = 200) -> Dict[str, Any]:
+def get_hunt_results(
+    cfg: ServerConfig, hunt_id: str, client_id: Optional[str] = None, limit: int = 200
+) -> Dict[str, Any]:
     predicate = ""
     if client_id:
         predicate = f" WHERE ClientId = '{client_id}'"

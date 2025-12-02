@@ -1,13 +1,15 @@
 # Velociraptor MCP Server
 
-## Quickstart (from PyPI)
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-pip install velociraptor-mcp-server
-velociraptor-mcp --config /absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml
-```
-You need a Velociraptor mTLS API config (`api.config.yaml`). The included `velociraptor_lab` can generate one (see “Using the lab”).
+## Quickstart
+- Create a venv and install: `python3 -m venv .venv && . .venv/bin/activate && pip install velociraptor-mcp-server`
+- Run (needs mTLS config): `velociraptor-mcp --config /absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml`
+- Codex one-liner (installed package):
+  ```sh
+  codex mcp add velociraptor \
+    --env VELOCIRAPTOR_API_CONFIG=/absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml \
+    -- velociraptor-mcp --config /absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml \
+    --log-level INFO --server-name velociraptor-mcp
+  ```
 
 A FastMCP-based server that exposes Velociraptor capabilities (VQL queries, hunts, artifacts, VFS/file ops, monitoring, alerts) over the MCP protocol for use with Codex/ChatGPT-style agents.
 
@@ -16,18 +18,13 @@ A FastMCP-based server that exposes Velociraptor capabilities (VQL queries, hunt
 - Podman (or Docker) if you want to use the included `velociraptor_lab` for local testing.
 - Generated Velociraptor mTLS API config (`api.config.yaml`) – the lab can generate this for you.
 
-## Installation (from source or dev)
-Create a virtualenv (avoids macOS/Homebrew PEP 668 errors) and install:
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-pip install .                 # runtime install from source
-pip install -e .[dev]         # editable install with dev deps
-```
-Prefer the package on PyPI for users; use editable mode for development. The legacy workflow still works if you prefer the raw requirements:
-```sh
-pip install -r requirements.txt
-```
+## Install / Develop
+- Runtime (source): `pip install .`
+- Dev/editable: `pip install -e .[dev]`
+- Legacy: `pip install -r requirements.txt`
+- Pre-commit: `pre-commit install` then `pre-commit run --all-files`
+
+Make targets (see `Makefile`): `make dev`, `make test`, `make build`, `make health`, `make release VERSION=0.1.6`.
 
 ## Running the MCP server
 After installing, you can either call the module directly or use the installed console script:
@@ -95,24 +92,14 @@ Note: lab API test is skipped automatically if `pyvelociraptor` or configs are m
 ## Codex MCP setup
 You can register this server with the Codex CLI (stdio transport). Pick one path:
 
-**Fast path (CLI add, installed package):**
-```sh
-codex mcp add velociraptor \
-  --env VELOCIRAPTOR_API_CONFIG=/absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml \
-  -- velociraptor-mcp --config /absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml \
-  --log-level INFO --server-name velociraptor-mcp
-```
-- Uses the installed console script; prefer absolute paths for the config.
-- After adding, restart Codex; check `/mcp` in the TUI to verify it’s running.
-
-**Local source/dev run:** (from repo, editable install or direct)
+**Local source/dev run:** (from repo)
 ```sh
 python3 main.py --config velociraptor_lab/volumes/api/api.config.yaml \
   --log-level INFO --server-name velociraptor-mcp
 ```
-If you want Codex to run from source, point `codex mcp add ... -- python3 main.py ...` with absolute paths.
+To have Codex run from source, point `codex mcp add ... -- python3 main.py ...` with absolute paths.
 
-**Manual config file:** add to `~/.codex/config.toml` if you prefer editing directly:
+**Manual config file (Codex):** add to `~/.codex/config.toml` if you prefer editing directly:
 ```toml
 [mcp_servers.velociraptor]
 command = "python3"
@@ -143,14 +130,35 @@ requirements.txt  # shared deps (MCP + lab)
 velociraptor_lab/ # podman/docker lab for local Velociraptor API
 ```
 
-## Publishing to PyPI (manual)
+## Docker (optional)
+Build and run with a mounted `api.config.yaml`:
 ```sh
-. .venv/bin/activate
-pip install -U pip build twine
-python -m build
-twine upload dist/*   # requires PYPI_USERNAME and PYPI_PASSWORD or token in ~/.pypirc
+docker build -t velociraptor-mcp .
+docker run --rm -v $PWD/velociraptor_lab/volumes/api/api.config.yaml:/app/velociraptor_lab/volumes/api/api.config.yaml:ro \
+  -e VELOCIRAPTOR_API_CONFIG=/app/velociraptor_lab/volumes/api/api.config.yaml \
+  velociraptor-mcp
 ```
-Tagging a release is recommended (see CI section).
+
+## Env template
+See `example.env` for common variables (`VELOCIRAPTOR_API_CONFIG`, `MCP_LOG_LEVEL`, `MCP_SERVER_NAME`).
+
+## Publishing / Releases
+Automated (GitHub Actions, Trusted Publishing on tag push):
+```sh
+git add pyproject.toml mcp_server/__init__.py README.md
+git commit -m "Release X.Y.Z"
+git tag -a vX.Y.Z -m "vX.Y.Z"
+git push origin main && git push origin vX.Y.Z
+```
+
+Manual (if you must):
+```sh
+python -m venv .venv && . .venv/bin/activate
+pip install -U pip build twine
+python -m build --no-isolation
+python -m twine check dist/*
+twine upload dist/*
+```
 
 ## Releasing via GitHub Actions
 If your CI publishes on tagged pushes, use these steps:

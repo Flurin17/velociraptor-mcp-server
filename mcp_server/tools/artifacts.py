@@ -7,7 +7,9 @@ from mcp_server.config import ServerConfig
 from mcp_server.utils import normalize_records
 
 
-def list_artifacts(cfg: ServerConfig, search: Optional[str] = None, limit: int = 200) -> Dict[str, Any]:
+def list_artifacts(
+    cfg: ServerConfig, search: Optional[str] = None, limit: int = 200
+) -> Dict[str, Any]:
     predicate = ""
     if search:
         predicate = f" WHERE name =~ '{search}' OR description =~ '{search}'"
@@ -23,17 +25,20 @@ def collect_artifact(
     artifact: str,
     params: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    parameters = params or {}
+    parameters = params
+    param_clause = f", parameters={parameters}" if parameters else ""
     # collect_client must be executed with FROM scope()
     vql = (
-        "SELECT collect_client(client_id='{client_id}', artifacts=['{artifact}'], "
-        "parameters={parameters}) AS FlowId FROM scope()"
-    ).format(client_id=client_id, artifact=artifact, parameters=parameters)
+        "SELECT collect_client(client_id='{client_id}', artifacts=['{artifact}']{param_clause}) "
+        "AS FlowId FROM scope()"
+    ).format(client_id=client_id, artifact=artifact, param_clause=param_clause)
     rows = get_client(cfg).query(vql)
     return {"result": normalize_records(rows)}
 
 
-def upload_artifact(cfg: ServerConfig, name: str, vql: str, description: str = "", type_: str = "CLIENT") -> Dict[str, Any]:
+def upload_artifact(
+    cfg: ServerConfig, name: str, vql: str, description: str = "", type_: str = "CLIENT"
+) -> Dict[str, Any]:
     artifact_doc = f"{{Name:'{name}',Description:'{description}',Type:'{type_}',Sources:[{{Queries:[{{VQL:'''{vql}'''}}]}}]}}"
     # upload_artifact() is not available in recent versions; artifact_set replaces it.
     vql_stmt = f"SELECT artifact_set(artifact={artifact_doc}) AS Uploaded FROM scope()"
