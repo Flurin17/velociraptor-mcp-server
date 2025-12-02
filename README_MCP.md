@@ -1,5 +1,14 @@
 # Velociraptor MCP Server
 
+## Quickstart (3 commands)
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+pip install .
+velociraptor-mcp --config /absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml
+```
+You need a Velociraptor mTLS API config (`api.config.yaml`). The included `velociraptor_lab` can generate one (see “Using the lab”).
+
 A FastMCP-based server that exposes Velociraptor capabilities (VQL queries, hunts, artifacts, VFS/file ops, monitoring, alerts) over the MCP protocol for use with Codex/ChatGPT-style agents.
 
 ## Prerequisites
@@ -103,6 +112,12 @@ tool_timeout_sec = 120     # optional; defaults to 60
 ```
 Either approach keeps your `api.config.yaml` path in one place via `VELOCIRAPTOR_API_CONFIG`. Codex shares the same MCP config between the CLI and IDE.
 
+## Troubleshooting
+- `ModuleNotFoundError` or `grpc` missing → ensure you’re in the venv and ran `pip install .`.
+- `Velociraptor API config not found` → point `--config` / `VELOCIRAPTOR_API_CONFIG` to the generated `api.config.yaml`.
+- Handshake fails in Codex → check `~/.codex/log/codex-tui.log`; most common is the missing config path.
+- PEP 668 “externally managed” error → always use a venv (as above).
+
 ## Structure
 ```
 mcp_server/       # server, tools, resources, prompts
@@ -111,3 +126,12 @@ tests/            # unit tests + fixtures
 requirements.txt  # shared deps (MCP + lab)
 velociraptor_lab/ # podman/docker lab for local Velociraptor API
 ```
+
+## Releasing to PyPI (manual)
+```sh
+. .venv/bin/activate
+pip install -U pip build twine
+python -m build
+twine upload dist/*   # requires PYPI_USERNAME and PYPI_PASSWORD or token in ~/.pypirc
+```
+Tagging a release is recommended (see CI section).

@@ -9,14 +9,14 @@ from mcp_server.utils import normalize_records
 
 def list_clients(cfg: ServerConfig, limit: int = 200, offset: int = 0) -> Dict[str, Any]:
     """List enrolled clients."""
-    vql = f"SELECT * FROM clients() LIMIT {limit} OFFSET {offset}"
-    rows = get_client(cfg).query(vql)
-    return {"clients": normalize_records(rows)}
+    vql = "SELECT * FROM clients()"
+    rows = normalize_records(get_client(cfg).query(vql))
+    return {"clients": rows[offset : offset + limit if limit else None]}
 
 
 def get_client_info(cfg: ServerConfig, client_id: str) -> Dict[str, Any]:
     """Fetch detailed info for a client."""
-    vql = f"SELECT * FROM client_info(client_id='{client_id}')"
+    vql = f"SELECT * FROM clients() WHERE client_id='{client_id}'"
     rows = get_client(cfg).query(vql)
     return {"client": normalize_records(rows)}
 
@@ -39,6 +39,6 @@ def search_clients(
     if query:
         predicates.append(query)
     where_clause = " WHERE " + " AND ".join(predicates) if predicates else ""
-    vql = f"SELECT * FROM clients(){where_clause} LIMIT {limit}"
-    rows = get_client(cfg).query(vql)
-    return {"clients": normalize_records(rows)}
+    vql = f"SELECT * FROM clients(){where_clause}"
+    rows = normalize_records(get_client(cfg).query(vql))
+    return {"clients": rows[:limit] if limit else rows}

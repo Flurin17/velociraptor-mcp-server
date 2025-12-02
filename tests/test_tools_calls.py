@@ -49,13 +49,13 @@ def test_query_vql_passes_through(cfg, fake_client):
 def test_list_clients_builds_vql(cfg, fake_client):
     clients.list_clients(cfg, limit=10, offset=5)
     stmt, _ = fake_client.queries[-1]
-    assert "clients()" in stmt and "LIMIT 10" in stmt and "OFFSET 5" in stmt
+    assert stmt.strip() == "SELECT * FROM clients()"
 
 
 def test_get_client_info_uses_id(cfg, fake_client):
     clients.get_client_info(cfg, "C.1234")
     stmt, _ = fake_client.queries[-1]
-    assert "client_info" in stmt and "C.1234" in stmt
+    assert "clients()" in stmt and "C.1234" in stmt
 
 
 def test_search_clients_combines_predicates(cfg, fake_client):
@@ -64,7 +64,7 @@ def test_search_clients_combines_predicates(cfg, fake_client):
     assert "Hostname =~ 'host'" in stmt
     assert "Labels =~ 'prod'" in stmt
     assert "OS = 'linux'" in stmt
-    assert "LIMIT 50" in stmt
+    assert stmt.strip().startswith("SELECT * FROM clients() WHERE")
 
 
 def test_list_hunts_with_state(cfg, fake_client):
