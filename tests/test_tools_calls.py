@@ -32,7 +32,7 @@ def fake_client(monkeypatch):
 
     fc = FakeClient()
     # Replace get_client in each tool module so every call uses the shared fake.
-    for module in (vql, clients, hunts, artifacts, files, monitoring):
+    for module in (vql, clients, hunts, artifacts, files):
         monkeypatch.setattr(module, "get_client", lambda _cfg, fc=fc: fc)
     return fc
 
@@ -129,7 +129,7 @@ def test_artifact_tools(cfg, fake_client):
 
 def test_file_tools_and_download(cfg, fake_client):
     files.list_directory(cfg, client_id="C.7", path="/tmp")
-    assert "vfs_ls" in fake_client.queries[-1][0]
+    assert "collect_client" in fake_client.queries[-1][0]
 
     files.get_file_info(cfg, client_id="C.7", path="/tmp/file.txt")
     assert "stat(" in fake_client.queries[-1][0]

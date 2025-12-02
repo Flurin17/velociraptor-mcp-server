@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from typing import Any, Dict
 
 from mcp_server.client import get_client
@@ -8,13 +9,43 @@ from mcp_server.utils import normalize_records
 
 
 def list_directory(cfg: ServerConfig, client_id: str, path: str) -> Dict[str, Any]:
-    # vfs accessor pulls ClientId from scope/env; use query() helper to inject it.
-    vql = (
-        "SELECT * FROM query(query=\"SELECT * FROM vfs_ls(path='{path}')\", "
-        "env=dict(ClientId='{client_id}'))"
-    ).format(path=path, client_id=client_id)
-    rows = get_client(cfg).query(vql)
-    return {"entries": normalize_records(rows)}
+    """
+    Populate and return a VFS directory listing by launching the
+    System.VFS.ListDirectory artifact on the client, then polling the
+    resulting flow for rows.
+    """
+    client = get_client(cfg)
+    # Kick off the collection.
+    start_vql = (
+        "SELECT collect_client("
+        "client_id='{client_id}', artifacts=['System.VFS.ListDirectory'], "
+        "parameters={{Path:'{path}', Accessor:'auto', Depth:0}})"
+        " AS Flow FROM scope()"
+    ).format(client_id=client_id, path=path)
+    flow_rows = list(client.query(start_vql))
+    flow_id = None
+    if flow_rows and flow_rows[0].get("Flow"):
+        flow = flow_rows[0]["Flow"]
+        flow_id = (
+            flow.get("flow_id")
+            or flow.get("FlowId")
+            or flow.get("flow_id".upper(), None)
+        )
+
+    entries: list[dict[str, Any]] = []
+    if flow_id:
+        # Poll for up to ~15 seconds for results to arrive.
+        poll_vql = (
+            f"SELECT * FROM flow_results(client_id='{client_id}', flow_id='{flow_id}')"
+        )
+        for _ in range(15):
+            rows = list(client.query(poll_vql))
+            if rows:
+                entries = normalize_records(rows)
+                break
+            time.sleep(1)
+
+    return {"entries": entries, "flow_id": flow_id}
 
 
 def get_file_info(cfg: ServerConfig, client_id: str, path: str) -> Dict[str, Any]:
