@@ -1,10 +1,10 @@
 # Velociraptor MCP Server
 
-## Quickstart (3 commands)
+## Quickstart (from PyPI)
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-pip install .
+pip install velociraptor-mcp-server
 velociraptor-mcp --config /absolute/path/to/velociraptor_lab/volumes/api/api.config.yaml
 ```
 You need a Velociraptor mTLS API config (`api.config.yaml`). The included `velociraptor_lab` can generate one (see “Using the lab”).
@@ -16,16 +16,15 @@ A FastMCP-based server that exposes Velociraptor capabilities (VQL queries, hunt
 - Podman (or Docker) if you want to use the included `velociraptor_lab` for local testing.
 - Generated Velociraptor mTLS API config (`api.config.yaml`) – the lab can generate this for you.
 
-## Installation
-Create a virtualenv (avoids macOS/Homebrew PEP 668 errors) and install the package:
+## Installation (from source or dev)
+Create a virtualenv (avoids macOS/Homebrew PEP 668 errors) and install:
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-pip install .            # runtime install
-# or, for tests and tooling
-pip install -e .[dev]
+pip install .                 # runtime install from source
+pip install -e .[dev]         # editable install with dev deps
 ```
-The legacy workflow still works if you prefer the raw requirements:
+Prefer the package on PyPI for users; use editable mode for development. The legacy workflow still works if you prefer the raw requirements:
 ```sh
 pip install -r requirements.txt
 ```
@@ -145,12 +144,13 @@ Tagging a release is recommended (see CI section).
 ## Releasing via GitHub Actions
 If your CI publishes on tagged pushes, use these steps:
 ```sh
-git add pyproject.toml mcp_server/__init__.py README_MCP.md
+git add pyproject.toml mcp_server/__init__.py README.md
 git commit -m "Release 0.1.2"        # or skip if already committed
 git tag -a v0.1.2 -m "v0.1.2"        # bump tag version as needed
 git push origin main                  # adjust branch name if different
 git push origin v0.1.2                # triggers the release workflow
 ```
+Trusted Publishing: the workflow uses PyPI OIDC; register `.github/workflows/ci.yml` as a Trusted Publisher in PyPI project settings. No `PYPI_API_TOKEN` is needed once linked.
 
 ## License
 This project is licensed under the MIT License. See `LICENSE` for the full text.

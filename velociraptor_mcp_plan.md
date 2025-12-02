@@ -140,7 +140,7 @@ Build a FastMCP-based MCP server that exposes comprehensive Velociraptor capabil
 - Logging configuration
 - Optional: server name, description
 
-### 21. `README_MCP.md`
+### 21. `README.md`
 
 - Documentation for the MCP server
 - Installation instructions
@@ -279,7 +279,7 @@ velociraptor-mcp-server/
 │   ├── test_mcp_server.py
 │   └── fixtures/           # sample VQL responses, api.config.yaml stub
 ├── requirements.txt        # universal venv for MCP + lab scripts
-├── README_MCP.md
+├── README.md
 ├── velociraptor_lab/       # Podman/Docker lab (existing)
 └── .venv/ (gitignored)     # shared virtualenv
 ```
