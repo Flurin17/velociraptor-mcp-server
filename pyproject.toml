@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61,<77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,8 +9,7 @@ description = "FastMCP server that exposes Velociraptor APIs."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Velociraptor MCP maintainers" }]
-license = "MIT"
-license-files = ["LICENSE"]
+license = { text = "MIT" }
 keywords = ["velociraptor", "mcp", "fastmcp", "ir", "dfir", "forensics"]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -40,5 +39,6 @@ dev = ["pytest"]
 velociraptor-mcp = "main:main"
 
 [tool.setuptools]
+license-files = ["LICENSE"]
 py-modules = ["main"]
 packages = ["mcp_server", "mcp_server.tools", "mcp_server.resources", "mcp_server.prompts"]
